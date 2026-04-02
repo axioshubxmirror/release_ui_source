@@ -2078,9 +2078,7 @@ function library:CreateWindow(options, ...)
 	ToggleBtn.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			if tick() - startTick < 0.25 then
-				if library.MainScreenGui then
-					library.MainScreenGui.Enabled = not library.MainScreenGui.Enabled
-				end
+				main.Visible = not main.Visible
 			end
 		end
 	end)
