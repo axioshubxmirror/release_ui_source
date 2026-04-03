@@ -2271,15 +2271,17 @@ function library:CreateWindow(options, ...)
 	local tabGotoFunctions = {}
 	local tabNavCurrentIndex = 1
 
-	-- Create floating ◀ ▶ nav panel OUTSIDE main UI (top-right corner)
+	-- Create ◀ ▶ nav panel inside main UI (top-right, tab bar level)
 	local navFrame = Instance_new("Frame")
 	navFrame.Name = "TabNavFrame"
-	navFrame.Parent = axiosLibrary
+	navFrame.Parent = main
+	navFrame.AnchorPoint = Vector2.new(1, 0)
 	navFrame.BackgroundColor3 = library.colors.background
 	colored[1 + #colored] = {navFrame, "BackgroundColor3", "background"}
 	navFrame.BorderColor3 = library.colors.innerBorder
 	colored[1 + #colored] = {navFrame, "BorderColor3", "innerBorder"}
-	navFrame.Size = UDim2.new(0, 52, 0, 22)
+	navFrame.Size = UDim2.new(0, 52, 0, 21)
+	navFrame.Position = UDim2.new(1, -8, 0, 8)
 	navFrame.ZIndex = 10
 
 	local navPrev = Instance_new("TextButton")
@@ -2294,7 +2296,7 @@ function library:CreateWindow(options, ...)
 	navPrev.TextColor3 = library.colors.main
 	colored[1 + #colored] = {navPrev, "TextColor3", "main"}
 	navPrev.TextSize = 14
-	navPrev.Size = UDim2.new(0, 24, 0, 20)
+	navPrev.Size = UDim2.new(0, 24, 0, 19)
 	navPrev.Position = UDim2.new(0, 1, 0, 1)
 	navPrev.ZIndex = 11
 
@@ -2310,23 +2312,9 @@ function library:CreateWindow(options, ...)
 	navNext.TextColor3 = library.colors.main
 	colored[1 + #colored] = {navNext, "TextColor3", "main"}
 	navNext.TextSize = 14
-	navNext.Size = UDim2.new(0, 24, 0, 20)
+	navNext.Size = UDim2.new(0, 24, 0, 19)
 	navNext.Position = UDim2.new(0, 27, 0, 1)
 	navNext.ZIndex = 11
-
-	-- Position nav panel at top-right of main, offset outside
-	local function updateNavPosition()
-		if main and main.Parent then
-			local pos = main.AbsolutePosition
-			local sz = main.AbsoluteSize
-			navFrame.Position = UDim2.fromOffset(pos.X + sz.X - navFrame.AbsoluteSize.X - 2, pos.Y - navFrame.AbsoluteSize.Y - 2)
-			navFrame.Visible = main.Visible
-		end
-	end
-	updateNavPosition()
-	library.signals[1 + #library.signals] = main:GetPropertyChangedSignal("AbsolutePosition"):Connect(updateNavPosition)
-	library.signals[1 + #library.signals] = main:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateNavPosition)
-	library.signals[1 + #library.signals] = main:GetPropertyChangedSignal("Visible"):Connect(updateNavPosition)
 
 	library.signals[1 + #library.signals] = navPrev.MouseButton1Click:Connect(function()
 		if #tabGotoFunctions < 2 then return end
