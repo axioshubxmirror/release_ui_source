@@ -2028,21 +2028,40 @@ function library:CreateWindow(options, ...)
 	axiosLibrary.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	axiosLibrary.DisplayOrder = 10
 	axiosLibrary.ResetOnSpawn = false
+	axiosLibrary.IgnoreGuiInset = true
+
+	-- Mobile detection
+	local isMobile = userInputService.TouchEnabled and not userInputService.KeyboardEnabled
+	library.IsMobile = isMobile
 	
 	local MobileGui = Instance_new("ScreenGui")
 	MobileGui.Name = "AxiosMobileToggle"
 	MobileGui.Parent = library.gui_parent
 	MobileGui.ResetOnSpawn = false
 	MobileGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	MobileGui.IgnoreGuiInset = true
+	MobileGui.DisplayOrder = 999
 
 	local ToggleBtn = Instance_new("ImageButton")
 	ToggleBtn.Name = "ToggleBtn"
 	ToggleBtn.Parent = MobileGui
-	ToggleBtn.BackgroundTransparency = 1
-	ToggleBtn.Position = UDim2.new(0, 15, 0, 15)
-	ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
+	ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	ToggleBtn.BackgroundTransparency = 0.5
+	ToggleBtn.Position = UDim2.new(0, 15, 0, 50)
+	ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
 	ToggleBtn.Image = "rbxassetid://105979877210085"
 	ToggleBtn.ZIndex = 99999
+	ToggleBtn.Active = true
+
+	local toggleCorner = Instance_new("UICorner")
+	toggleCorner.CornerRadius = UDim.new(0, 12)
+	toggleCorner.Parent = ToggleBtn
+
+	local toggleStroke = Instance_new("UIStroke")
+	toggleStroke.Color = library.colors.main
+	toggleStroke.Thickness = 1.5
+	toggleStroke.Transparency = 0.3
+	toggleStroke.Parent = ToggleBtn
 
 	local dragging = false
 	local dragInput, dragStart, startPos
@@ -2077,7 +2096,7 @@ function library:CreateWindow(options, ...)
 
 	ToggleBtn.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			if tick() - startTick < 0.25 then
+			if tick() - startTick < 0.3 then
 				main.Visible = not main.Visible
 			end
 		end
@@ -2090,7 +2109,43 @@ function library:CreateWindow(options, ...)
 	main.BorderColor3 = library.colors.outerBorder
 	colored[1 + #colored] = {main, "BorderColor3", "outerBorder"}
 	main.Position = UDim2.fromScale(0.5, 0.5)
-	main.Size = UDim2.fromOffset(500, 545)
+	main.ClipsDescendants = true
+
+	-- Responsive sizing for mobile
+	local BASE_WIDTH, BASE_HEIGHT = 500, 545
+	local function updateMainSize()
+		local camera = workspace.CurrentCamera
+		if not camera then
+			main.Size = UDim2.fromOffset(BASE_WIDTH, BASE_HEIGHT)
+			return
+		end
+		local viewportSize = camera.ViewportSize
+		local screenW, screenH = viewportSize.X, viewportSize.Y
+		local padding = 20
+		local maxW = screenW - padding * 2
+		local maxH = screenH - padding * 2
+		local finalW = math.min(BASE_WIDTH, maxW)
+		local finalH = math.min(BASE_HEIGHT, maxH)
+		-- Maintain aspect ratio if needed
+		local scale = math.min(finalW / BASE_WIDTH, finalH / BASE_HEIGHT)
+		if scale < 1 then
+			finalW = math.floor(BASE_WIDTH * scale)
+			finalH = math.floor(BASE_HEIGHT * scale)
+		end
+		main.Size = UDim2.fromOffset(finalW, finalH)
+	end
+	updateMainSize()
+
+	-- Listen for screen size changes (orientation change on mobile)
+	pcall(function()
+		local camera = workspace.CurrentCamera
+		if camera then
+			library.signals[1 + #library.signals] = camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+				updateMainSize()
+			end)
+		end
+	end)
+
 	makeDraggable(main, main)
 	mainBorder.Name = "mainBorder"
 	mainBorder.Parent = main
