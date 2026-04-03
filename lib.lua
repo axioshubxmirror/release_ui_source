@@ -2271,32 +2271,62 @@ function library:CreateWindow(options, ...)
 	local tabGotoFunctions = {}
 	local tabNavCurrentIndex = 1
 
-	-- Create ◀ ▶ nav buttons on the tab bar
+	-- Create floating ◀ ▶ nav panel OUTSIDE main UI (top-right corner)
+	local navFrame = Instance_new("Frame")
+	navFrame.Name = "TabNavFrame"
+	navFrame.Parent = axiosLibrary
+	navFrame.BackgroundColor3 = library.colors.background
+	colored[1 + #colored] = {navFrame, "BackgroundColor3", "background"}
+	navFrame.BorderColor3 = library.colors.innerBorder
+	colored[1 + #colored] = {navFrame, "BorderColor3", "innerBorder"}
+	navFrame.Size = UDim2.new(0, 52, 0, 22)
+	navFrame.ZIndex = 10
+
 	local navPrev = Instance_new("TextButton")
 	navPrev.Name = "navPrev"
-	navPrev.Parent = tabsHolder
-	navPrev.BackgroundTransparency = 1
+	navPrev.Parent = navFrame
+	navPrev.BackgroundColor3 = library.colors.sectionBackground
+	colored[1 + #colored] = {navPrev, "BackgroundColor3", "sectionBackground"}
+	navPrev.BorderColor3 = library.colors.elementBorder
+	colored[1 + #colored] = {navPrev, "BorderColor3", "elementBorder"}
 	navPrev.Font = Enum.Font.Code
 	navPrev.Text = "◀"
 	navPrev.TextColor3 = library.colors.main
 	colored[1 + #colored] = {navPrev, "TextColor3", "main"}
 	navPrev.TextSize = 14
-	navPrev.TextStrokeTransparency = 0.75
-	navPrev.Size = UDim2.new(0, 18, 0, 23)
-	navPrev.LayoutOrder = 99990
+	navPrev.Size = UDim2.new(0, 24, 0, 20)
+	navPrev.Position = UDim2.new(0, 1, 0, 1)
+	navPrev.ZIndex = 11
 
 	local navNext = Instance_new("TextButton")
 	navNext.Name = "navNext"
-	navNext.Parent = tabsHolder
-	navNext.BackgroundTransparency = 1
+	navNext.Parent = navFrame
+	navNext.BackgroundColor3 = library.colors.sectionBackground
+	colored[1 + #colored] = {navNext, "BackgroundColor3", "sectionBackground"}
+	navNext.BorderColor3 = library.colors.elementBorder
+	colored[1 + #colored] = {navNext, "BorderColor3", "elementBorder"}
 	navNext.Font = Enum.Font.Code
 	navNext.Text = "▶"
 	navNext.TextColor3 = library.colors.main
 	colored[1 + #colored] = {navNext, "TextColor3", "main"}
 	navNext.TextSize = 14
-	navNext.TextStrokeTransparency = 0.75
-	navNext.Size = UDim2.new(0, 18, 0, 23)
-	navNext.LayoutOrder = 99991
+	navNext.Size = UDim2.new(0, 24, 0, 20)
+	navNext.Position = UDim2.new(0, 27, 0, 1)
+	navNext.ZIndex = 11
+
+	-- Position nav panel at top-right of main, offset outside
+	local function updateNavPosition()
+		if main and main.Parent then
+			local pos = main.AbsolutePosition
+			local sz = main.AbsoluteSize
+			navFrame.Position = UDim2.fromOffset(pos.X + sz.X - navFrame.AbsoluteSize.X - 2, pos.Y - navFrame.AbsoluteSize.Y - 2)
+			navFrame.Visible = main.Visible
+		end
+	end
+	updateNavPosition()
+	library.signals[1 + #library.signals] = main:GetPropertyChangedSignal("AbsolutePosition"):Connect(updateNavPosition)
+	library.signals[1 + #library.signals] = main:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateNavPosition)
+	library.signals[1 + #library.signals] = main:GetPropertyChangedSignal("Visible"):Connect(updateNavPosition)
 
 	library.signals[1 + #library.signals] = navPrev.MouseButton1Click:Connect(function()
 		if #tabGotoFunctions < 2 then return end
