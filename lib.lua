@@ -2271,17 +2271,17 @@ function library:CreateWindow(options, ...)
 	local tabGotoFunctions = {}
 	local tabNavCurrentIndex = 1
 
-	-- Create ◀ ▶ nav panel outside main UI (right side attached)
+	-- Create ◀ ▶ nav panel outside main UI (top-right above border)
 	local navFrame = Instance_new("Frame")
 	navFrame.Name = "TabNavFrame"
 	navFrame.Parent = main
-	navFrame.AnchorPoint = Vector2.new(0, 0)
+	navFrame.AnchorPoint = Vector2.new(1, 1)
 	navFrame.BackgroundColor3 = library.colors.background
 	colored[1 + #colored] = {navFrame, "BackgroundColor3", "background"}
 	navFrame.BorderColor3 = library.colors.innerBorder
 	colored[1 + #colored] = {navFrame, "BorderColor3", "innerBorder"}
 	navFrame.Size = UDim2.new(0, 52, 0, 21)
-	navFrame.Position = UDim2.new(1, 0, 0, 8)
+	navFrame.Position = UDim2.new(1, 0, 0, -2)
 	navFrame.ZIndex = 10
 
 	local navPrev = Instance_new("TextButton")
