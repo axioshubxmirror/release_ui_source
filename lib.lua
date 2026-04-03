@@ -2267,6 +2267,51 @@ function library:CreateWindow(options, ...)
 		selected = {},
 		Flags = elements
 	}
+	-- Tab Navigation: track all tabs and their goto functions
+	local tabGotoFunctions = {}
+	local tabNavCurrentIndex = 1
+
+	-- Create ◀ ▶ nav buttons on the tab bar
+	local navPrev = Instance_new("TextButton")
+	navPrev.Name = "navPrev"
+	navPrev.Parent = tabsHolder
+	navPrev.BackgroundTransparency = 1
+	navPrev.Font = Enum.Font.Code
+	navPrev.Text = "◀"
+	navPrev.TextColor3 = library.colors.main
+	colored[1 + #colored] = {navPrev, "TextColor3", "main"}
+	navPrev.TextSize = 14
+	navPrev.TextStrokeTransparency = 0.75
+	navPrev.Size = UDim2.new(0, 18, 0, 23)
+	navPrev.LayoutOrder = 99990
+
+	local navNext = Instance_new("TextButton")
+	navNext.Name = "navNext"
+	navNext.Parent = tabsHolder
+	navNext.BackgroundTransparency = 1
+	navNext.Font = Enum.Font.Code
+	navNext.Text = "▶"
+	navNext.TextColor3 = library.colors.main
+	colored[1 + #colored] = {navNext, "TextColor3", "main"}
+	navNext.TextSize = 14
+	navNext.TextStrokeTransparency = 0.75
+	navNext.Size = UDim2.new(0, 18, 0, 23)
+	navNext.LayoutOrder = 99991
+
+	library.signals[1 + #library.signals] = navPrev.MouseButton1Click:Connect(function()
+		if #tabGotoFunctions < 2 then return end
+		tabNavCurrentIndex = tabNavCurrentIndex - 1
+		if tabNavCurrentIndex < 1 then tabNavCurrentIndex = #tabGotoFunctions end
+		local fn = tabGotoFunctions[tabNavCurrentIndex]
+		if fn then fn() end
+	end)
+	library.signals[1 + #library.signals] = navNext.MouseButton1Click:Connect(function()
+		if #tabGotoFunctions < 2 then return end
+		tabNavCurrentIndex = tabNavCurrentIndex + 1
+		if tabNavCurrentIndex > #tabGotoFunctions then tabNavCurrentIndex = 1 end
+		local fn = tabGotoFunctions[tabNavCurrentIndex]
+		if fn then fn() end
+	end)
 	library.globals["__Window" .. windowName].windowFunctions = windowFunctions
 	function windowFunctions:Show(x)
 		main.Visible = (x == nil) or (x == true) or (x == 1)
@@ -2381,6 +2426,12 @@ function library:CreateWindow(options, ...)
 			homepage = goto
 		end
 		library.signals[1 + #library.signals] = newTab.MouseButton1Click:Connect(goto)
+		-- Register this tab for nav arrow cycling
+		local thisTabIndex = #tabGotoFunctions + 1
+		tabGotoFunctions[thisTabIndex] = goto
+		library.signals[1 + #library.signals] = newTab.MouseButton1Click:Connect(function()
+			tabNavCurrentIndex = thisTabIndex
+		end)
 		if windowFunctions.tabCount == 1 then
 			tabSlider.Size = UDim2.fromOffset(newTab.AbsoluteSize.X, 1)
 			tabSlider.Position = UDim2.fromOffset(newTab.AbsolutePosition.X, newTab.AbsolutePosition.Y + newTab.AbsoluteSize.Y) - UDim2.fromOffset(main.AbsolutePosition.X, main.AbsolutePosition.Y)
