@@ -2181,7 +2181,7 @@ function library:CreateWindow(options, ...)
 	innerMainHolder.BackgroundColor3 = Color3.new(1, 1, 1)
 	innerMainHolder.BackgroundTransparency = 1
 	innerMainHolder.Position = UDim2:fromOffset(25)
-	innerMainHolder.Size = UDim2.new(1, 0, 1, -25)
+	innerMainHolder.Size = UDim2.new(1, 0, 1, -33)
 	innerBackdrop.Name = "innerBackdrop"
 	innerBackdrop.Parent = innerMainHolder
 	innerBackdrop.BackgroundColor3 = Color3.new(1, 1, 1)
@@ -2702,7 +2702,7 @@ function library:CreateWindow(options, ...)
 				end
 				newSection.Size = UDim2.new(1, -20, 0, (15 + sectionList.AbsoluteContentSize.Y))
 				if currentHolder then
-					currentHolder.CanvasSize = UDim2:fromOffset(currentHolder:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y + 22 + (tonumber(extra) or 0))
+					currentHolder.CanvasSize = UDim2:fromOffset(currentHolder:FindFirstChildOfClass("UIListLayout").AbsoluteContentSize.Y + 20 + (tonumber(extra) or 0))
 				end
 			end
 			function sectionFunctions:UpdateAll(...)
