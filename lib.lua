@@ -2743,7 +2743,7 @@ function library:CreateWindow(options, ...)
 				newToggle.Size = UDim2.new(1, 0, 0, 19)
 				toggle.Name = "toggle"
 				toggle.Parent = newToggle
-				toggle.Active = true
+				toggle.Active = false
 				toggle.BackgroundColor3 = library.colors.topGradient
 				local colored_toggle_BackgroundColor3 = {toggle, "BackgroundColor3", "topGradient"}
 				colored[1 + #colored] = colored_toggle_BackgroundColor3
@@ -2758,7 +2758,7 @@ function library:CreateWindow(options, ...)
 				colored[1 + #colored] = colored_toggle_ImageColor3
 				toggleInner.Name = "toggleInner"
 				toggleInner.Parent = toggle
-				toggleInner.Active = true
+				toggleInner.Active = false
 				toggleInner.AnchorPoint = Vector2.new(0.5, 0.5)
 				toggleInner.BackgroundColor3 = library.colors.topGradient
 				local colored_toggleInner_BackgroundColor3 = {toggleInner, "BackgroundColor3", "topGradient"}
@@ -3369,7 +3369,7 @@ function library:CreateWindow(options, ...)
 					newButton.Size = UDim2.new(1, 0, 0, 24)
 					button.Name = "button"
 					button.Parent = newButton
-					button.Active = true
+					button.Active = false
 					button.BackgroundColor3 = library.colors.topGradient
 					local colored_button_BackgroundColor3 = {button, "BackgroundColor3", "topGradient"}
 					colored[1 + #colored] = colored_button_BackgroundColor3
@@ -3385,7 +3385,7 @@ function library:CreateWindow(options, ...)
 					local buttonInner = Instance_new("ImageLabel")
 					buttonInner.Name = "buttonInner"
 					buttonInner.Parent = button
-					buttonInner.Active = true
+					buttonInner.Active = false
 					buttonInner.AnchorPoint = Vector2.new(0.5, 0.5)
 					buttonInner.BackgroundColor3 = library.colors.topGradient
 					local colored_buttonInner_BackgroundColor3 = {buttonInner, "BackgroundColor3", "topGradient"}
@@ -3666,7 +3666,7 @@ function library:CreateWindow(options, ...)
 				newTextbox.Size = UDim2.new(1, 0, 0, 42)
 				textbox.Name = "textbox"
 				textbox.Parent = newTextbox
-				textbox.Active = true
+				textbox.Active = false
 				textbox.BackgroundColor3 = library.colors.topGradient
 				local colored_textbox_BackgroundColor3 = {textbox, "BackgroundColor3", "topGradient"}
 				colored[1 + #colored] = colored_textbox_BackgroundColor3
@@ -3681,7 +3681,7 @@ function library:CreateWindow(options, ...)
 				colored[1 + #colored] = colored_textbox_ImageColor3
 				textboxInner.Name = "textboxInner"
 				textboxInner.Parent = textbox
-				textboxInner.Active = true
+				textboxInner.Active = false
 				textboxInner.AnchorPoint = Vector2.new(0.5, 0.5)
 				textboxInner.BackgroundColor3 = library.colors.topGradient
 				colored[1 + #colored] = {textboxInner, "BackgroundColor3", "topGradient"}
@@ -3737,7 +3737,7 @@ function library:CreateWindow(options, ...)
 				realTextbox.Parent = textbox
 				textboxHeadline.Name = "textboxHeadline"
 				textboxHeadline.Parent = newTextbox
-				textboxHeadline.Active = true
+				textboxHeadline.Active = false
 				textboxHeadline.BackgroundColor3 = Color3.new(1, 1, 1)
 				textboxHeadline.BackgroundTransparency = 1
 				textboxHeadline.Position = UDim2.new(0.031)
@@ -4357,7 +4357,7 @@ function library:CreateWindow(options, ...)
 				colored[1 + #colored] = {sliderColored, "ImageColor3", "main", 2.5}
 				sliderHeadline.Name = "sliderHeadline"
 				sliderHeadline.Parent = newSlider
-				sliderHeadline.Active = true
+				sliderHeadline.Active = false
 				sliderHeadline.BackgroundColor3 = Color3.new(1, 1, 1)
 				sliderHeadline.BackgroundTransparency = 1
 				sliderHeadline.Position = UDim2.new(0.031)
@@ -4416,7 +4416,7 @@ function library:CreateWindow(options, ...)
 					realTextbox = Instance_new("TextBox")
 					textbox.Name = "textbox"
 					textbox.Parent = newSlider
-					textbox.Active = true
+					textbox.Active = false
 					textbox.BackgroundColor3 = library.colors.topGradient
 					local colored_textbox_BackgroundColor3 = {textbox, "BackgroundColor3", "topGradient"}
 					colored[1 + #colored] = colored_textbox_BackgroundColor3
@@ -4431,7 +4431,7 @@ function library:CreateWindow(options, ...)
 					colored[1 + #colored] = colored_textbox_ImageColor3
 					textboxInner.Name = "textboxInner"
 					textboxInner.Parent = textbox
-					textboxInner.Active = true
+					textboxInner.Active = false
 					textboxInner.AnchorPoint = Vector2.new(0.5, 0.5)
 					textboxInner.BackgroundColor3 = library.colors.topGradient
 					colored[1 + #colored] = {textboxInner, "BackgroundColor3", "topGradient"}
@@ -4558,21 +4558,33 @@ function library:CreateWindow(options, ...)
 					end
 					last_val = sliderValue
 				end
+				-- Find parent ScrollingFrame for mobile scroll-lock
+				local sliderScrollFrame = nil
+				do
+					local p = newSlider.Parent
+					while p do
+						if p:IsA("ScrollingFrame") then sliderScrollFrame = p; break end
+						p = p.Parent
+					end
+				end
 				library.signals[1 + #library.signals] = newSlider.InputBegan:Connect(function(input)
 					if not library.colorpicker and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
 						sliderDragging = true
 						isDraggingSomething = true
+						if sliderScrollFrame then sliderScrollFrame.ScrollingEnabled = false end
 					end
 				end)
 				library.signals[1 + #library.signals] = newSlider.InputEnded:Connect(function(input)
 					if not library.colorpicker and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
 						sliderDragging = false
 						isDraggingSomething = false
+						if sliderScrollFrame then sliderScrollFrame.ScrollingEnabled = true end
 					end
 				end)
 				library.signals[1 + #library.signals] = newSlider.InputBegan:Connect(function(input)
 					if not library.colorpicker and not isDraggingSomething and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
 						isDraggingSomething = true
+						if sliderScrollFrame then sliderScrollFrame.ScrollingEnabled = false end
 						sliding(input, sliderInner, sliderColored)
 					end
 				end)
@@ -4727,7 +4739,7 @@ function library:CreateWindow(options, ...)
 				newDropdown.Size = UDim2.new(1, 0, 0, 42)
 				dropdown.Name = "dropdown"
 				dropdown.Parent = newDropdown
-				dropdown.Active = true
+				dropdown.Active = false
 				dropdown.BackgroundColor3 = library.colors.topGradient
 				local colored_dropdown_BackgroundColor3 = {dropdown, "BackgroundColor3", "topGradient"}
 				colored[1 + #colored] = colored_dropdown_BackgroundColor3
@@ -4742,7 +4754,7 @@ function library:CreateWindow(options, ...)
 				colored[1 + #colored] = colored_dropdown_ImageColor3
 				dropdownInner.Name = "dropdownInner"
 				dropdownInner.Parent = dropdown
-				dropdownInner.Active = true
+				dropdownInner.Active = false
 				dropdownInner.AnchorPoint = Vector2.new(0.5, 0.5)
 				dropdownInner.BackgroundColor3 = library.colors.topGradient
 				colored[1 + #colored] = {dropdownInner, "BackgroundColor3", "topGradient"}
@@ -5482,7 +5494,7 @@ function library:CreateWindow(options, ...)
 					newDropdown.Size = UDim2.new(1, 0, 0, 42)
 					dropdown.Name = "dropdown"
 					dropdown.Parent = newDropdown
-					dropdown.Active = true
+					dropdown.Active = false
 					dropdown.BackgroundColor3 = library.colors.topGradient
 					local colored_dropdown_BackgroundColor3 = {dropdown, "BackgroundColor3", "topGradient"}
 					colored[1 + #colored] = colored_dropdown_BackgroundColor3
@@ -5497,7 +5509,7 @@ function library:CreateWindow(options, ...)
 					colored[1 + #colored] = colored_dropdown_ImageColor3
 					dropdownInner.Name = "dropdownInner"
 					dropdownInner.Parent = dropdown
-					dropdownInner.Active = true
+					dropdownInner.Active = false
 					dropdownInner.AnchorPoint = Vector2.new(0.5, 0.5)
 					dropdownInner.BackgroundColor3 = library.colors.topGradient
 					colored[1 + #colored] = {dropdownInner, "BackgroundColor3", "topGradient"}
@@ -6061,7 +6073,7 @@ function library:CreateWindow(options, ...)
 							newButton.Size = UDim2.new(1, 0, 0, 24)
 							button.Name = "button"
 							button.Parent = newButton
-							button.Active = true
+							button.Active = false
 							button.BackgroundColor3 = library.colors.topGradient
 							local colored_button_BackgroundColor3 = {button, "BackgroundColor3", "topGradient"}
 							colored[1 + #colored] = colored_button_BackgroundColor3
@@ -6077,7 +6089,7 @@ function library:CreateWindow(options, ...)
 							local buttonInner = Instance_new("ImageLabel")
 							buttonInner.Name = "buttonInner"
 							buttonInner.Parent = button
-							buttonInner.Active = true
+							buttonInner.Active = false
 							buttonInner.AnchorPoint = Vector2.new(0.5, 0.5)
 							buttonInner.BackgroundColor3 = library.colors.topGradient
 							colored[1 + #colored] = {buttonInner, "BackgroundColor3", "topGradient"}
@@ -6298,7 +6310,7 @@ function library:CreateWindow(options, ...)
 				newDropdown.Size = UDim2.new(1, 0, 0, 42)
 				dropdown.Name = "dropdown"
 				dropdown.Parent = newDropdown
-				dropdown.Active = true
+				dropdown.Active = false
 				dropdown.BackgroundColor3 = library.colors.topGradient
 				local colored_dropdown_BackgroundColor3 = {dropdown, "BackgroundColor3", "topGradient"}
 				colored[1 + #colored] = colored_dropdown_BackgroundColor3
@@ -6313,7 +6325,7 @@ function library:CreateWindow(options, ...)
 				colored[1 + #colored] = colored_dropdown_ImageColor3
 				dropdownInner.Name = "dropdownInner"
 				dropdownInner.Parent = dropdown
-				dropdownInner.Active = true
+				dropdownInner.Active = false
 				dropdownInner.AnchorPoint = Vector2.new(0.5, 0.5)
 				dropdownInner.BackgroundColor3 = library.colors.topGradient
 				colored[1 + #colored] = {dropdownInner, "BackgroundColor3", "topGradient"}
@@ -6337,7 +6349,7 @@ function library:CreateWindow(options, ...)
 				dropdownToggle.ImageColor3 = Color3.fromRGB(171, 171, 171)
 				dropdownSelection.Name = "dropdownSelection"
 				dropdownSelection.Parent = dropdown
-				dropdownSelection.Active = true
+				dropdownSelection.Active = false
 				dropdownSelection.BackgroundColor3 = Color3.new(1, 1, 1)
 				dropdownSelection.BackgroundTransparency = 1
 				dropdownSelection.Position = UDim2.new(0.0295)
