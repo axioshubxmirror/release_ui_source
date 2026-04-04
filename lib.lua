@@ -2275,46 +2275,172 @@ function library:CreateWindow(options, ...)
 	local navFrame = Instance_new("Frame")
 	navFrame.Name = "TabNavFrame"
 	navFrame.Parent = main
-	navFrame.AnchorPoint = Vector2.new(1, 1)
+	navFrame.AnchorPoint = Vector2.new(0, 1)
 	navFrame.BackgroundColor3 = library.colors.background
 	colored[1 + #colored] = {navFrame, "BackgroundColor3", "background"}
 	navFrame.BorderColor3 = library.colors.innerBorder
 	colored[1 + #colored] = {navFrame, "BorderColor3", "innerBorder"}
-	navFrame.Size = UDim2.new(0, 52, 0, 21)
-	navFrame.Position = UDim2.new(1, 0, 0, -2)
+	navFrame.Size = UDim2.new(1, 0, 0, 21)
+	navFrame.Position = UDim2.new(0, 0, 0, -2)
 	navFrame.ZIndex = 10
+
+	local macClose = Instance_new("TextButton")
+	macClose.Name = "MacClose"
+	macClose.Parent = navFrame
+	macClose.Text = ""
+	macClose.BackgroundColor3 = Color3.fromRGB(255, 95, 86)
+	macClose.Size = UDim2.new(0, 11, 0, 11)
+	macClose.Position = UDim2.new(0, 8, 0.5, 0)
+	macClose.AnchorPoint = Vector2.new(0, 0.5)
+	macClose.ZIndex = 11
+	local macCloseCorner = Instance_new("UICorner")
+	macCloseCorner.CornerRadius = UDim.new(1, 0)
+	macCloseCorner.Parent = macClose
+
+	library.signals[1 + #library.signals] = macClose.MouseButton1Click:Connect(function()
+		library:Prompt({
+			Name = "Destroy UI",
+			Text = "Are you sure you want to completely unload and close this UI?",
+			Options = {
+				{
+					Name = "Yes",
+					Callback = function()
+						if library.unload then library.unload() end
+					end
+				},
+				{
+					Name = "Cancel",
+					Callback = function() end
+				}
+			}
+		})
+	end)
+
+	local macMin = Instance_new("TextButton")
+	macMin.Name = "MacMin"
+	macMin.Parent = navFrame
+	macMin.Text = ""
+	macMin.BackgroundColor3 = Color3.fromRGB(255, 189, 46)
+	macMin.Size = UDim2.new(0, 11, 0, 11)
+	macMin.Position = UDim2.new(0, 24, 0.5, 0)
+	macMin.AnchorPoint = Vector2.new(0, 0.5)
+	macMin.ZIndex = 11
+	local macMinCorner = Instance_new("UICorner")
+	macMinCorner.CornerRadius = UDim.new(1, 0)
+	macMinCorner.Parent = macMin
+
+	library.signals[1 + #library.signals] = macMin.MouseButton1Click:Connect(function()
+		main.Visible = false
+	end)
+
+	local macMax = Instance_new("Frame")
+	macMax.Name = "MacMax"
+	macMax.Parent = navFrame
+	macMax.BackgroundColor3 = Color3.fromRGB(39, 201, 63)
+	macMax.Size = UDim2.new(0, 11, 0, 11)
+	macMax.Position = UDim2.new(0, 40, 0.5, 0)
+	macMax.AnchorPoint = Vector2.new(0, 0.5)
+	macMax.ZIndex = 11
+	local macMaxCorner = Instance_new("UICorner")
+	macMaxCorner.CornerRadius = UDim.new(1, 0)
+	macMaxCorner.Parent = macMax
 
 	local navPrev = Instance_new("TextButton")
 	navPrev.Name = "navPrev"
 	navPrev.Parent = navFrame
-	navPrev.BackgroundColor3 = library.colors.sectionBackground
-	colored[1 + #colored] = {navPrev, "BackgroundColor3", "sectionBackground"}
-	navPrev.BorderColor3 = library.colors.elementBorder
-	colored[1 + #colored] = {navPrev, "BorderColor3", "elementBorder"}
+	navPrev.AnchorPoint = Vector2.new(1, 0.5)
+	navPrev.BackgroundTransparency = 1
 	navPrev.Font = Enum.Font.Code
 	navPrev.Text = "◀"
 	navPrev.TextColor3 = library.colors.main
 	colored[1 + #colored] = {navPrev, "TextColor3", "main"}
 	navPrev.TextSize = 14
-	navPrev.Size = UDim2.new(0, 24, 0, 19)
-	navPrev.Position = UDim2.new(0, 1, 0, 1)
+	navPrev.Size = UDim2.new(0, 14, 0, 17)
+	navPrev.Position = UDim2.new(1, -26, 0.5, -1)
 	navPrev.ZIndex = 11
 
 	local navNext = Instance_new("TextButton")
 	navNext.Name = "navNext"
 	navNext.Parent = navFrame
-	navNext.BackgroundColor3 = library.colors.sectionBackground
-	colored[1 + #colored] = {navNext, "BackgroundColor3", "sectionBackground"}
-	navNext.BorderColor3 = library.colors.elementBorder
-	colored[1 + #colored] = {navNext, "BorderColor3", "elementBorder"}
+	navNext.AnchorPoint = Vector2.new(1, 0.5)
+	navNext.BackgroundTransparency = 1
 	navNext.Font = Enum.Font.Code
 	navNext.Text = "▶"
 	navNext.TextColor3 = library.colors.main
 	colored[1 + #colored] = {navNext, "TextColor3", "main"}
 	navNext.TextSize = 14
-	navNext.Size = UDim2.new(0, 24, 0, 19)
-	navNext.Position = UDim2.new(0, 27, 0, 1)
+	navNext.Size = UDim2.new(0, 14, 0, 17)
+	navNext.Position = UDim2.new(1, -8, 0.5, -1)
 	navNext.ZIndex = 11
+
+	makeDraggable(navFrame, main)
+
+	local titleContainer = Instance_new("Frame")
+	titleContainer.Name = "navTitleContainer"
+	titleContainer.Parent = navFrame
+	titleContainer.BackgroundTransparency = 1
+	titleContainer.Size = UDim2.new(1, -120, 1, 0)
+	titleContainer.Position = UDim2.new(0, 60, 0, 0)
+	titleContainer.ZIndex = 11
+	
+	local uiListLayout = Instance_new("UIListLayout")
+	uiListLayout.Parent = titleContainer
+	uiListLayout.FillDirection = Enum.FillDirection.Horizontal
+	uiListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	uiListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	uiListLayout.Padding = UDim.new(0, 5)
+
+	local ytText = Instance_new("TextLabel")
+	ytText.Name = "ytText"
+	ytText.Parent = titleContainer
+	ytText.BackgroundTransparency = 1
+	ytText.Size = UDim2.new(0, 0, 1, 0)
+	ytText.AutomaticSize = Enum.AutomaticSize.X
+	ytText.Font = Enum.Font.Code
+	ytText.Text = "YouTube"
+	ytText.TextColor3 = Color3.new(1, 1, 1)
+	ytText.TextSize = 14
+	ytText.LayoutOrder = 1
+	ytText.ZIndex = 11
+
+	local ytGradient = Instance_new("UIGradient")
+	ytGradient.Parent = ytText
+	ytGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 40, 40)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 120, 120)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 40, 40))
+	})
+	ytGradient.Offset = Vector2.new(-1, 0)
+
+	local navTitleCenter = Instance_new("TextLabel")
+	navTitleCenter.Name = "axiosText"
+	navTitleCenter.Parent = titleContainer
+	navTitleCenter.BackgroundTransparency = 1
+	navTitleCenter.Size = UDim2.new(0, 0, 1, 0)
+	navTitleCenter.AutomaticSize = Enum.AutomaticSize.X
+	navTitleCenter.Font = Enum.Font.Code
+	navTitleCenter.Text = "Axios Hub"
+	navTitleCenter.TextColor3 = Color3.new(1, 1, 1)
+	navTitleCenter.TextSize = 14
+	navTitleCenter.LayoutOrder = 2
+	navTitleCenter.ZIndex = 11
+
+	local navUIGradient = Instance_new("UIGradient")
+	navUIGradient.Parent = navTitleCenter
+	navUIGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 140)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 255, 220)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 140))
+	})
+	navUIGradient.Offset = Vector2.new(-1, 0)
+
+	spawn(function()
+		local ts = game:GetService("TweenService")
+		local ti = TweenInfo.new(1.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true)
+		ts:Create(navUIGradient, ti, {Offset = Vector2.new(1, 0)}):Play()
+		ts:Create(ytGradient, ti, {Offset = Vector2.new(1, 0)}):Play()
+	end)
 
 	library.signals[1 + #library.signals] = navPrev.MouseButton1Click:Connect(function()
 		if #tabGotoFunctions < 2 then return end
