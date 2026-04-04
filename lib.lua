@@ -7754,7 +7754,7 @@ function library:CreateWindow(options, ...)
 		end
 		if options.Credit ~= false then
 			daaata[1 + #daaata] = {"AddLabel", "__Designer.Label.Creator", detailssection, {
-				Text = "Library by Axios Hub"
+				Text = "Library by Axios Hub v1.2"
 			}}
 		elseif "Gee, thanks for your support." then
 		end
