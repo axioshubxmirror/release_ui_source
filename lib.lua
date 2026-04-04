@@ -2391,28 +2391,6 @@ function library:CreateWindow(options, ...)
 	uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	uiListLayout.Padding = UDim.new(0, 5)
 
-	local ytText = Instance_new("TextLabel")
-	ytText.Name = "ytText"
-	ytText.Parent = titleContainer
-	ytText.BackgroundTransparency = 1
-	ytText.Size = UDim2.new(0, 0, 1, 0)
-	ytText.AutomaticSize = Enum.AutomaticSize.X
-	ytText.Font = Enum.Font.Code
-	ytText.Text = "YouTube"
-	ytText.TextColor3 = Color3.new(1, 1, 1)
-	ytText.TextSize = 14
-	ytText.LayoutOrder = 1
-	ytText.ZIndex = 11
-
-	local ytGradient = Instance_new("UIGradient")
-	ytGradient.Parent = ytText
-	ytGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 40, 40)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 120, 120)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 40, 40))
-	})
-	ytGradient.Offset = Vector2.new(-1, 0)
-
 	local navTitleCenter = Instance_new("TextLabel")
 	navTitleCenter.Name = "axiosText"
 	navTitleCenter.Parent = titleContainer
@@ -2420,7 +2398,7 @@ function library:CreateWindow(options, ...)
 	navTitleCenter.Size = UDim2.new(0, 0, 1, 0)
 	navTitleCenter.AutomaticSize = Enum.AutomaticSize.X
 	navTitleCenter.Font = Enum.Font.Code
-	navTitleCenter.Text = "Axios Hub"
+	navTitleCenter.Text = "https://www.youtube.com/@AxiosHub"
 	navTitleCenter.TextColor3 = Color3.new(1, 1, 1)
 	navTitleCenter.TextSize = 14
 	navTitleCenter.LayoutOrder = 2
@@ -2439,7 +2417,6 @@ function library:CreateWindow(options, ...)
 		local ts = game:GetService("TweenService")
 		local ti = TweenInfo.new(1.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true)
 		ts:Create(navUIGradient, ti, {Offset = Vector2.new(1, 0)}):Play()
-		ts:Create(ytGradient, ti, {Offset = Vector2.new(1, 0)}):Play()
 	end)
 
 	library.signals[1 + #library.signals] = navPrev.MouseButton1Click:Connect(function()
