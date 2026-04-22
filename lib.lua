@@ -4332,6 +4332,7 @@ function library:CreateWindow(options, ...)
 				newSlider.Parent = sectionHolder
 				newSlider.BackgroundColor3 = Color3.new(1, 1, 1)
 				newSlider.BackgroundTransparency = 1
+				newSlider.Active = true
 				newSlider.Size = UDim2.new(1, 0, 0, 42)
 				slider.Name = "slider"
 				slider.Parent = newSlider
