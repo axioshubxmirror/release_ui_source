@@ -4589,7 +4589,7 @@ function library:CreateWindow(options, ...)
 				-- Combined InputBegan: start drag + initial slide
 				-- Must connect on ALL slider elements because InputBegan doesn't bubble to parent in Roblox
 				local function onSliderInputBegan(input)
-					if not library.colorpicker and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+					if not library.colorpicker and not isDraggingSomething and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
 						sliderDragging = true
 						isDraggingSomething = true
 						if sliderScrollFrame then sliderScrollFrame.ScrollingEnabled = false end
