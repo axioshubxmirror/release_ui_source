@@ -1134,6 +1134,24 @@ if not mouse and PluginManager and runService:IsStudio() then
 	library.plugin = shared.library_plugin
 end
 library.Mouse = mouse
+-- Global touch/mouse position tracker for mobile support
+-- mouse.X/Y doesn't update for touch; we track the latest pointer position here
+local _pointerX, _pointerY = 0, 0
+local function getPointerX() return (userInputService.TouchEnabled and _pointerX) or mouse.X end
+local function getPointerY() return (userInputService.TouchEnabled and _pointerY) or mouse.Y end
+do
+	local function onInputChanged(input)
+		local itype = input.UserInputType
+		if itype == Enum.UserInputType.Touch or itype == Enum.UserInputType.MouseMovement then
+			_pointerX = input.Position.X
+			_pointerY = input.Position.Y
+		end
+	end
+	userInputService.InputChanged:Connect(onInputChanged)
+	userInputService.InputBegan:Connect(onInputChanged)
+end
+library.getPointerX = getPointerX
+library.getPointerY = getPointerY
 local textToSize = nil
 do
 	local textService = game:GetService("TextService")
@@ -4567,27 +4585,32 @@ function library:CreateWindow(options, ...)
 						p = p.Parent
 					end
 				end
+				-- Combined InputBegan: start drag + initial slide in one handler
 				library.signals[1 + #library.signals] = newSlider.InputBegan:Connect(function(input)
 					if not library.colorpicker and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
 						sliderDragging = true
 						isDraggingSomething = true
 						if sliderScrollFrame then sliderScrollFrame.ScrollingEnabled = false end
+						sliding(input, sliderInner, sliderColored)
 					end
 				end)
+				-- InputEnded: stop drag
 				library.signals[1 + #library.signals] = newSlider.InputEnded:Connect(function(input)
-					if not library.colorpicker and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 						sliderDragging = false
 						isDraggingSomething = false
 						if sliderScrollFrame then sliderScrollFrame.ScrollingEnabled = true end
 					end
 				end)
-				library.signals[1 + #library.signals] = newSlider.InputBegan:Connect(function(input)
-					if not library.colorpicker and not isDraggingSomething and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-						isDraggingSomething = true
-						if sliderScrollFrame then sliderScrollFrame.ScrollingEnabled = false end
-						sliding(input, sliderInner, sliderColored)
+				-- Also stop drag on global InputEnded (finger lifted outside slider area)
+				library.signals[1 + #library.signals] = userInputService.InputEnded:Connect(function(input)
+					if sliderDragging and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+						sliderDragging = false
+						isDraggingSomething = false
+						if sliderScrollFrame then sliderScrollFrame.ScrollingEnabled = true end
 					end
 				end)
+				-- Continuous drag: track movement
 				library.signals[1 + #library.signals] = userInputService.InputChanged:Connect(function(input)
 					if not library.colorpicker and sliderDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 						sliding(input, sliderInner, sliderColored)
@@ -6800,10 +6823,26 @@ function library:CreateWindow(options, ...)
 						delay(0.01, update)
 					end
 				end
+				-- Track touch start position to distinguish tap from scroll on mobile
+				local _dd_touchStart = nil
+				library.signals[1 + #library.signals] = newDropdown.InputBegan:Connect(function(input)
+					if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+						_dd_touchStart = input.Position
+					end
+				end)
 				library.signals[1 + #library.signals] = newDropdown.InputEnded:Connect(function(input)
 					if not library.colorpicker and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-						showing = not showing
-						display(showing)
+						-- On mobile, only toggle if finger didn't move much (tap, not scroll)
+						local isTap = true
+						if _dd_touchStart and input.UserInputType == Enum.UserInputType.Touch then
+							local delta = (input.Position - _dd_touchStart).Magnitude
+							isTap = delta < 10
+						end
+						_dd_touchStart = nil
+						if isTap then
+							showing = not showing
+							display(showing)
+						end
 					end
 				end)
 				library.signals[1 + #library.signals] = newDropdown.MouseEnter:Connect(function()
@@ -7400,8 +7439,9 @@ function library:CreateWindow(options, ...)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 						isDraggingSomething = true
 						colorInput = (colorInput and colorInput:Disconnect() and nil) or runService.RenderStepped:Connect(function()
-							local colorX = (math.clamp(mouse.X - color.AbsolutePosition.X, 0, color.AbsoluteSize.X) / color.AbsoluteSize.X)
-							local colorY = (math.clamp(mouse.Y - color.AbsolutePosition.Y, 0, color.AbsoluteSize.Y) / color.AbsoluteSize.Y)
+							local pX, pY = getPointerX(), getPointerY()
+							local colorX = (math.clamp(pX - color.AbsolutePosition.X, 0, color.AbsoluteSize.X) / color.AbsoluteSize.X)
+							local colorY = (math.clamp(pY - color.AbsolutePosition.Y, 0, color.AbsoluteSize.Y) / color.AbsoluteSize.Y)
 							selectorColor.Position = UDim2.fromScale(colorX, colorY)
 							colorS = colorX
 							colorV = 1 - colorY
@@ -7415,7 +7455,16 @@ function library:CreateWindow(options, ...)
 						if colorInput then
 							isDraggingSomething = false
 							colorInput:Disconnect()
+							colorInput = nil
 						end
+					end
+				end)
+				-- Also release color drag on global InputEnded (finger lifted outside area)
+				library.signals[1 + #library.signals] = userInputService.InputEnded:Connect(function(input)
+					if colorInput and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+						isDraggingSomething = false
+						colorInput:Disconnect()
+						colorInput = nil
 					end
 				end)
 				library.signals[1 + #library.signals] = hue.InputBegan:Connect(function(input)
@@ -7425,7 +7474,8 @@ function library:CreateWindow(options, ...)
 						end
 						isDraggingSomething = true
 						hueInput = runService.RenderStepped:Connect(function()
-							local hueX = math.clamp(mouse.X - hue.AbsolutePosition.X, 0, hue.AbsoluteSize.X) / hue.AbsoluteSize.X
+							local pX = getPointerX()
+							local hueX = math.clamp(pX - hue.AbsolutePosition.X, 0, hue.AbsoluteSize.X) / hue.AbsoluteSize.X
 							selectorHue.Position = UDim2.new(hueX)
 							colorH = 1 - hueX
 							UpdateColorPicker()
@@ -7437,6 +7487,15 @@ function library:CreateWindow(options, ...)
 					if hueInput and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
 						isDraggingSomething = false
 						hueInput:Disconnect()
+						hueInput = nil
+					end
+				end)
+				-- Also release hue drag on global InputEnded
+				library.signals[1 + #library.signals] = userInputService.InputEnded:Connect(function(input)
+					if hueInput and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+						isDraggingSomething = false
+						hueInput:Disconnect()
+						hueInput = nil
 					end
 				end)
 				if rainbowColorMode then
