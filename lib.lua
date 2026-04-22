@@ -2127,6 +2127,8 @@ function library:CreateWindow(options, ...)
 	main.BorderColor3 = library.colors.outerBorder
 	colored[1 + #colored] = {main, "BorderColor3", "outerBorder"}
 	main.Position = UDim2.fromScale(0.5, 0.5)
+	main.Active = true -- Sink input: prevent clicks/touches from passing through to the game
+	main.Selectable = false
 	main.ClipsDescendants = false
 
 	-- Responsive sizing for mobile
