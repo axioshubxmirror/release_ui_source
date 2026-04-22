@@ -4586,15 +4586,20 @@ function library:CreateWindow(options, ...)
 						p = p.Parent
 					end
 				end
-				-- Combined InputBegan: start drag + initial slide in one handler
-				library.signals[1 + #library.signals] = newSlider.InputBegan:Connect(function(input)
+				-- Combined InputBegan: start drag + initial slide
+				-- Must connect on ALL slider elements because InputBegan doesn't bubble to parent in Roblox
+				local function onSliderInputBegan(input)
 					if not library.colorpicker and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
 						sliderDragging = true
 						isDraggingSomething = true
 						if sliderScrollFrame then sliderScrollFrame.ScrollingEnabled = false end
 						sliding(input, sliderInner, sliderColored)
 					end
-				end)
+				end
+				library.signals[1 + #library.signals] = newSlider.InputBegan:Connect(onSliderInputBegan)
+				library.signals[1 + #library.signals] = slider.InputBegan:Connect(onSliderInputBegan)
+				library.signals[1 + #library.signals] = sliderInner.InputBegan:Connect(onSliderInputBegan)
+				library.signals[1 + #library.signals] = sliderColored.InputBegan:Connect(onSliderInputBegan)
 				-- InputEnded: stop drag
 				library.signals[1 + #library.signals] = newSlider.InputEnded:Connect(function(input)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
