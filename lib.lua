@@ -1874,12 +1874,13 @@ do
 			Text.Text = TextStr
 			Text.TextColor3 = library.colors.elementText
 			colored[1 + #colored] = {Text, "TextColor3", "elementText"}
-			Text.TextScaled = true
-			Text.TextSize = 14
+			Text.TextScaled = false
+			Text.TextSize = 13
 			Text.TextStrokeTransparency = 0.75
 			Text.TextWrap = true
 			Text.TextWrapped = true
 			Text.TextXAlignment = Enum.TextXAlignment.Left
+			Text.TextYAlignment = Enum.TextYAlignment.Center
 			Bar.BackgroundColor3 = library.colors.main
 			colored[1 + #colored] = {Bar, "BackgroundColor3", "main"}
 			Bar.BorderSizePixel = 0
@@ -1896,7 +1897,10 @@ do
 			Close.Position = UDim2.new(1, -6, 0.5, 0)
 			Close.ScaleType = Enum.ScaleType.Fit
 			Close.Size = UDim2.new(0, 10, 0, 10)
-			Notification.Size = UDim2.new(0, 64 + textToSize(Text).X, 0, 32)
+			local lineCount = 1
+			for _ in string.gmatch(TextStr, "\n") do lineCount = lineCount + 1 end
+			local notifHeight = math.max(32, 10 + lineCount * 18)
+			Notification.Size = UDim2.new(0, math.max(200, 64 + textToSize(Text).X), 0, notifHeight)
 			Notification.Parent = Popups
 			Notification.LayoutOrder = #Notification.Parent:GetChildren() * ((Inverse and 1) or -1)
 			if Popups.Parent then
@@ -1915,7 +1919,10 @@ do
 				end
 				Str = ((Str == nil) and "No text given") or tostring(Str)
 				Text.Text, NotificationObj.Text = Str, Str
-				Notification.Size = UDim2.new(0, 44 + Text.TextBounds.X, 0, 32)
+				local lc = 1
+				for _ in string.gmatch(Str, "\n") do lc = lc + 1 end
+				local nh = math.max(32, 10 + lc * 18)
+				Notification.Size = UDim2.new(0, math.max(200, 44 + Text.TextBounds.X), 0, nh)
 				return Str, Text
 			end
 			local function Pause(self, Set, NoForce)
